@@ -1,10 +1,10 @@
-﻿cff-version: 1.2.0
+cff-version: 1.2.0
 message: "If you use this software, please cite it."
 title: "Mars Colony Viability (Strict Science-Only Baseline)"
 type: software
 authors:
   - name: "Recycling World"
-repository-code: "https://github.com/<YOUR_GITHUB_USER>/marte-viability-study"
+repository-code: "https://github.com/crasofuentes-hub/marte-viability-study"
 license: "CC-BY-4.0"
 keywords:
   - Mars
@@ -21,4 +21,4 @@ preferred-citation:
   authors:
     - name: "Recycling World"
   year: 2026
-  url: "https://github.com/<YOUR_GITHUB_USER>/marte-viability-study"
+url: "https://github.com/crasofuentes-hub/marte-viability-study"

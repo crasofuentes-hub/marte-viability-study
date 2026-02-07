@@ -1,4 +1,10 @@
-﻿"""
+# CONSERVATION-LAW BOOKKEEPING (strict baseline)
+# Conceptual updates (no hidden buffers):
+#   M_O2(t+dt)  = M_O2(t)  - N*c_O2*dt  + production_O2(t)  + resupply_O2(t)
+#   M_H2O(t+dt) = M_H2O(t) - N*c_H2O*dt + production_H2O(t) + resupply_H2O(t)
+# Collapse occurs when any critical store becomes negative.
+
+"""
 models/model.py
 
 Strict-by-construction simulator:
