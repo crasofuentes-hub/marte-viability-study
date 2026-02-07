@@ -1,0 +1,24 @@
+﻿cff-version: 1.2.0
+message: "If you use this software, please cite it."
+title: "Mars Colony Viability (Strict Science-Only Baseline)"
+type: software
+authors:
+  - name: "Recycling World"
+repository-code: "https://github.com/<YOUR_GITHUB_USER>/marte-viability-study"
+license: "CC-BY-4.0"
+keywords:
+  - Mars
+  - life support
+  - oxygen
+  - water recycling
+  - stochastic logistics
+  - reproducible research
+  - verified constants
+date-released: "2026-02-07"
+preferred-citation:
+  type: article
+  title: "Mathematical and Physical Analysis of Mars Colony Viability Under Verified Constraints (Strict Baseline v0.0.1)"
+  authors:
+    - name: "Recycling World"
+  year: 2026
+  url: "https://github.com/<YOUR_GITHUB_USER>/marte-viability-study"
