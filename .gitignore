@@ -8,3 +8,6 @@ figures/*
 data/*
 !data/.gitkeep
 .coverage
+# Matplotlib cache (do not commit)
+results/_mplconfig/
+results/_mplconfig/**

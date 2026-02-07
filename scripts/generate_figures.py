@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import json
 import math
-import os
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Tuple
+from typing import Any, Iterable, List, Tuple
 
-# Headless backend (no GUI)
 import matplotlib
 matplotlib.use("Agg", force=True)
 
@@ -15,18 +13,14 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import NullLocator
 
 RESULTS_DIR = Path("results")
+MAX_PNG_PER_SCENARIO = 6   # profesional: no inundar el repo
 
 def _is_num(x: Any) -> bool:
-    if isinstance(x, (int, float)) and not isinstance(x, bool):
-        return math.isfinite(float(x))
-    return False
+    return isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(float(x))
 
 def _looks_like_series(v: Any) -> bool:
-    if not isinstance(v, list):
+    if not isinstance(v, list) or len(v) < 3:
         return False
-    if len(v) < 3:
-        return False
-    # must be mostly numeric
     nums = sum(1 for x in v if _is_num(x))
     return nums >= int(0.9 * len(v))
 
@@ -42,46 +36,27 @@ def _walk(obj: Any, prefix: str = "") -> Iterable[Tuple[str, Any]]:
             yield (p, v)
             yield from _walk(v, p)
 
-def _pick_series(candidates: List[Tuple[str, List[float]]], prefer_terms: List[str]) -> Optional[Tuple[str, List[float]]]:
-    # deterministic: stable sort by (priority, -len, key)
-    scored = []
-    for k, s in candidates:
-        k_low = k.lower()
-        pr = min([prefer_terms.index(t) for t in prefer_terms if t in k_low], default=10_000)
-        scored.append((pr, -len(s), k, s))
-    scored.sort(key=lambda x: (x[0], x[1], x[2]))
-    if not scored:
-        return None
-    _, _, k, s = scored[0]
-    return (k, s)
-
-def _safe_plot_series(out_png: Path, title: str, y: List[float]) -> None:
+def _safe_plot(out_png: Path, title: str, y: List[float]) -> None:
     out_png.parent.mkdir(parents=True, exist_ok=True)
 
     fig = Figure(figsize=(10, 4), dpi=140)
     canvas = FigureCanvas(fig)
-
     ax = fig.add_subplot(111)
 
-    # CRÍTICO: eliminar ticks/locators para esquivar el bug de deepcopy en Py3.14 + mpl (ticks crean MarkerStyle)
+    # Evita ticks/markers que en algunos entornos Py3.14+mpl disparan deepcopy recursivo
     ax.xaxis.set_major_locator(NullLocator())
     ax.yaxis.set_major_locator(NullLocator())
     ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
 
-    # Plot
     x = list(range(len(y)))
     ax.plot(x, y)
 
-    # Etiquetas "manuales" (sin ticks)
     fig.text(0.01, 0.98, title, ha="left", va="top")
-    fig.text(0.01, 0.02, f"n={len(y)}  min={min(y):.3g}  max={max(y):.3g}", ha="left", va="bottom")
+    fig.text(0.01, 0.02, f"n={len(y)}  min={min(y):.6g}  max={max(y):.6g}", ha="left", va="bottom")
 
-    fig.tight_layout(rect=[0, 0.05, 1, 0.92])
+    fig.tight_layout(rect=[0, 0.06, 1, 0.92])
     canvas.draw()
     fig.savefig(out_png)
-
-def _load_json(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
 
 def generate() -> int:
     if not RESULTS_DIR.exists():
@@ -94,50 +69,34 @@ def generate() -> int:
     wrote = 0
 
     for jf in json_files:
-        obj = _load_json(jf)
+        obj = json.loads(jf.read_text(encoding="utf-8"))
 
-        series_candidates: List[Tuple[str, List[float]]] = []
+        candidates: List[Tuple[str, List[float]]] = []
         for k, v in _walk(obj):
             if _looks_like_series(v):
-                series_candidates.append((k, [float(x) for x in v]))
+                candidates.append((k, [float(x) for x in v]))
 
-        # Si NO hay series numéricas, reporta claves reales para debugging (determinista)
-        if not series_candidates:
-            keys = []
-            if isinstance(obj, dict):
-                keys = sorted(list(obj.keys()))
-            print(f"[generate_figures] {jf.name}: NO numeric series found. top-level keys={keys}")
+        # Reporte determinista
+        if not candidates:
+            top_keys = sorted(list(obj.keys())) if isinstance(obj, dict) else []
+            print(f"[generate_figures] {jf.name}: NO numeric series found. top-level keys={top_keys}")
             continue
 
-        # Selección determinista por prioridad textual
-        o2_pick = _pick_series(series_candidates, prefer_terms=["o2", "oxygen"])
-        w_pick  = _pick_series(series_candidates, prefer_terms=["water", "h2o"])
-
-        # Si no hay match semántico, NO adivinamos: reportamos candidatos y seguimos
-        if o2_pick is None or w_pick is None:
-            print(f"[generate_figures] {jf.name}: cannot select o2/water deterministically.")
-            print("  candidates:")
-            for k, s in sorted(series_candidates, key=lambda x: x[0])[:50]:
-                print(f"   - {k} (len={len(s)})")
-            continue
+        # Ordena por longitud desc, y luego por key asc (determinista)
+        candidates.sort(key=lambda kv: (-len(kv[1]), kv[0]))
 
         base = jf.stem
-        o2_key, o2_series = o2_pick
-        w_key,  w_series  = w_pick
-
-        out_o2 = RESULTS_DIR / f"{base}_o2.png"
-        out_w  = RESULTS_DIR / f"{base}_water.png"
-
-        _safe_plot_series(out_o2, f"{base} :: O2  (source={o2_key})", o2_series)
-        _safe_plot_series(out_w,  f"{base} :: Water (source={w_key})",  w_series)
-
-        print(f"[generate_figures] wrote: {out_o2.as_posix()}  {out_w.as_posix()}")
-        wrote += 2
+        for i, (k, s) in enumerate(candidates[:MAX_PNG_PER_SCENARIO], start=1):
+            out = RESULTS_DIR / f"{base}_series_{i:02d}.png"
+            title = f"{base} :: series_{i:02d}  (source={k})"
+            _safe_plot(out, title, s)
+            print(f"[generate_figures] wrote: {out.as_posix()} (len={len(s)})")
+            wrote += 1
 
     return wrote
 
 if __name__ == "__main__":
     n = generate()
     if n == 0:
-        raise SystemExit("No PNGs created. Either no numeric series exist in results/S*.json or selection could not be deterministic.")
+        raise SystemExit("No PNGs created. Your results JSON contain no numeric series arrays.")
     print(f"OK: created {n} PNGs")
