@@ -1,19 +1,20 @@
 # Non-Claims (Strict Baseline)
 
-This repository is intentionally conservative and does **not** make claims that are not defensible from primary sources.
+This repository does **not** make claims that cannot be supported by primary sources.
 
 ## This repo does NOT claim
 - That a sustainable Mars colony is achievable within any specific timeline.
-- That any particular launch system cost/kg is real or stable.
 - That fertility or healthy multi-generational reproduction is feasible at 0.38g.
-- That radiation risk is "acceptable" or "unacceptable" (no clinical conversion here).
+- That radiation risk is acceptable/unacceptable (no clinical conversion here).
 - That ISRU can be scaled reliably without long-duration demonstrated data.
-- That agriculture/food closure is solved.
+- That food closure is solved.
+- That terraforming is feasible or desirable.
 
-## What this repo DOES claim
-- If you provide explicit initial stores and verified per-capita consumables, the model can compute the **time-to-depletion** under a defined resupply schedule and closure fractions.
-- Radiation dose can be tracked as a transparent bookkeeping variable using published dose-equivalent rates.
+## This repo DOES provide
+- Transparent depletion-time computation for O₂ and water under explicit inputs.
+- Radiation dose bookkeeping using published cruise vs surface rates.
+- A reproducible, auditable workflow (tests + CI) designed to prevent hidden assumptions.
 
-## Why this matters
-Most "Mars colonization" discussions fail due to hidden assumptions.
-This repository is designed to surface assumptions, not bury them.
+## Why this stance is intentional
+Most "Mars colonization" narratives fail due to untracked assumptions.
+This repo is designed to surface assumptions, quantify constraints, and remain falsifiable.
