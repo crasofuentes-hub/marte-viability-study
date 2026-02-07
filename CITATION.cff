@@ -1,25 +1,22 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it."
+message: "If you use this software, please cite it using the metadata below."
 title: "Mars Colony Viability (Strict Science-Only Baseline)"
-type: software
+version: "v0.0.3"
+doi: "10.5281/zenodo.18517842"
+date-released: "2026"
 authors:
-  - name: "Recycling World"
+  - family-names: "Fuentes Fernández"
+    given-names: "Oscar"
+    affiliation: "Independent Researcher"
+    orcid: ""
 repository-code: "https://github.com/crasofuentes-hub/marte-viability-study"
-license: "CC-BY-4.0"
+license: "MIT"
 keywords:
   - Mars
-  - life support
+  - space-habitation
+  - life-support-systems
   - oxygen
-  - water recycling
-  - stochastic logistics
-  - reproducible research
-  - verified constants
-date-released: "2026-02-07"
-preferred-citation:
-  type: article
-  title: "Mathematical and Physical Analysis of Mars Colony Viability Under Verified Constraints (Strict Baseline v0.0.1)"
-  authors:
-    - name: "Recycling World"
-  year: 2026
-url: "https://github.com/crasofuentes-hub/marte-viability-study"
-doi: 10.5281/zenodo.18517605
+  - water
+  - radiation
+  - systems-engineering
+  - reproducible-research
