@@ -56,3 +56,5 @@ See `CITATION.cff`.
 
 - If/when a Zenodo DOI exists, it will be added to `CITATION.cff` and pinned in a new release.
 
+## DOI
+Zenodo DOI: 10.5281/zenodo.18517605
