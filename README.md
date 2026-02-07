@@ -1,39 +1,45 @@
-﻿# Mars Colony Viability (Strict Science-Only Baseline)
+# Mars Colony Viability (Strict Science-Only Baseline)
 
 This repository starts from **zero assumptions** and enforces a hard rule:
 
-> **No numeric parameter is used unless it is backed by a verifiable primary source.**
+> **No numeric parameter is used unless it is backed by a verifiable primary source** (NASA/ESA technical reports, peer-reviewed journals, or NASA NTRS).
 
-All verified constants are in `models/verified_constants.py` and documented in `VERIFIED_SOURCES.md`.
+All verified numeric anchors are stored in models/verified_constants.py and documented in VERIFIED_SOURCES.md.
 
-## Scope (v0.0.1)
-This baseline model addresses a real, testable question without speculative inputs:
+## What this repo answers (v0.0.x baseline)
+A narrow, falsifiable engineering question:
 
-**Given a colony size N0, initial storage, local closure fractions for oxygen and water, and discrete resupply windows, when does the colony collapse due to O2 or water depletion?**
+**Given colony size N0, initial stores of O₂ and water, local closure fractions, and discrete resupply windows: _when does the colony collapse due to O₂ or water depletion?_**
 
-It also tracks **radiation dose bookkeeping** using published RAD rates (cruise vs surface). It does **not** convert dose to cancer probability (that requires clinical models and additional validated assumptions).
+Radiation is tracked only as **dose bookkeeping** using published cruise vs surface dose-equivalent rates.
+This repo does **not** convert dose to clinical outcomes.
 
-### What this repo explicitly does NOT do (yet)
-- No food/calories model (requires verified agricultural yields and energy budgets).
-- No fertility / multi-generational physiology in 0.38g (no verified human dataset).
-- No ISRU reliability curves (requires long-duration demonstrated plant datasets).
-- No Terraforming claims.
+## Negative-result posture (important)
+This project is designed to surface constraints. If a scenario collapses, that is a scientifically useful result (it reveals required closure/resupply conditions).
 
-Those will be added only when backed by primary sources (NASA/ESA technical reports, peer-reviewed journals, or NTRS).
+## What this repo explicitly does NOT do (yet)
+- Food/calories model (requires verified agricultural yields and energy budgets).
+- Fertility / multi-generational physiology at 0.38g (no verified human dataset).
+- Long-duration ISRU reliability curves (requires demonstrated multi-year plant datasets).
+- Terraforming claims.
 
-## Verified anchors used
-- MOXIE total O2 produced and max hourly rate (NASA, 2023-09-06)
-- RAD dose equivalent rates cruise vs surface (SwRI, 2013-12-09)
-- ISS water recovery milestone 98% (NASA, 2023-06-20)
-- NASA radiation framing: 3% REID at upper 95% CL (NASA TP, 2021)
-- Metabolic consumables: O2 0.84 kg/crew-member-day and water 9.68 kg/CM-d baseline (NASA NTRS, 2023)
+See docs/NON_CLAIMS.md.
 
-See `VERIFIED_SOURCES.md`.
-
-## Install
-```bash
+## Quickstart
+### Install
+`ash
 python -m venv .venv
 # Windows PowerShell:
-. .\.venv\Scripts\Activate.ps1
+. .\\.venv\\Scripts\\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+python main.py --help
+`ash
+python -m pytest -c pytest.ini
+- docs/NON_CLAIMS.md — explicit scope limits and non-claims
+- paper/manuscript.md — manuscript scaffold (Markdown → LaTeX/PDF later)
+
+## Citation
+See CITATION.cff.
+
+- If/when a Zenodo DOI exists, it will be added to CITATION.cff and pinned in a new release.
