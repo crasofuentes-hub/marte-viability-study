@@ -1,149 +1,143 @@
+from __future__ import annotations
+
 import json
-import re
+import math
+import os
 from pathlib import Path
-import dataclasses
+from typing import Any, Iterable, List, Optional, Tuple
 
-import matplotlib.pyplot as plt
+# Headless backend (no GUI)
+import matplotlib
+matplotlib.use("Agg", force=True)
 
-from models.model import Scenario, simulate
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.ticker import NullLocator
 
-REPO = Path(__file__).resolve().parents[1]
-RESULTS = REPO / "results"
+RESULTS_DIR = Path("results")
 
-def _is_numeric_series(x):
-    if not isinstance(x, (list, tuple)):
+def _is_num(x: Any) -> bool:
+    if isinstance(x, (int, float)) and not isinstance(x, bool):
+        return math.isfinite(float(x))
+    return False
+
+def _looks_like_series(v: Any) -> bool:
+    if not isinstance(v, list):
         return False
-    if len(x) < 5:
+    if len(v) < 3:
         return False
-    # allow ints/floats
-    for v in x[:5]:
-        if not isinstance(v, (int, float)):
-            return False
-    return True
+    # must be mostly numeric
+    nums = sum(1 for x in v if _is_num(x))
+    return nums >= int(0.9 * len(v))
 
-def _pick_time_axis(res):
-    # Prefer explicit time arrays if present
-    for k in ["t_days", "t", "time_days", "days"]:
-        if k in res and _is_numeric_series(res[k]):
-            return k, res[k]
-    # Otherwise infer from any series length
-    for k, v in res.items():
-        if _is_numeric_series(v):
-            return "index_days", list(range(len(v)))
-    return None, None
+def _walk(obj: Any, prefix: str = "") -> Iterable[Tuple[str, Any]]:
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            p = f"{prefix}.{k}" if prefix else str(k)
+            yield (p, v)
+            yield from _walk(v, p)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            p = f"{prefix}[{i}]"
+            yield (p, v)
+            yield from _walk(v, p)
 
-def _pick_series(res, kind):
-    # kind in {"o2","water"}
-    # Strong preference: keys that contain kind and look like series/stock
-    cand = []
-    for k, v in res.items():
-        if not _is_numeric_series(v):
-            continue
-        lk = k.lower()
-        score = 0
-        if kind == "o2":
-            if "o2" in lk or "oxygen" in lk:
-                score += 5
-        else:
-            if "water" in lk or "h2o" in lk:
-                score += 5
-        if "series" in lk:
-            score += 3
-        if "stock" in lk or "store" in lk:
-            score += 2
-        if "days" in lk:
-            score += 1
-        if score > 0:
-            cand.append((score, k, v))
-    if cand:
-        cand.sort(reverse=True, key=lambda t: t[0])
-        return cand[0][1], cand[0][2]
+def _pick_series(candidates: List[Tuple[str, List[float]]], prefer_terms: List[str]) -> Optional[Tuple[str, List[float]]]:
+    # deterministic: stable sort by (priority, -len, key)
+    scored = []
+    for k, s in candidates:
+        k_low = k.lower()
+        pr = min([prefer_terms.index(t) for t in prefer_terms if t in k_low], default=10_000)
+        scored.append((pr, -len(s), k, s))
+    scored.sort(key=lambda x: (x[0], x[1], x[2]))
+    if not scored:
+        return None
+    _, _, k, s = scored[0]
+    return (k, s)
 
-    # Fallback: choose any numeric series with semantic hints
-    for k, v in res.items():
-        if not _is_numeric_series(v):
-            continue
-        lk = k.lower()
-        if kind == "o2" and ("o2" in lk or "oxygen" in lk):
-            return k, v
-        if kind == "water" and ("water" in lk or "h2o" in lk):
-            return k, v
+def _safe_plot_series(out_png: Path, title: str, y: List[float]) -> None:
+    out_png.parent.mkdir(parents=True, exist_ok=True)
 
-    return None, None
+    fig = Figure(figsize=(10, 4), dpi=140)
+    canvas = FigureCanvas(fig)
 
-def _scenario_from_json(path):
-    data = json.loads(path.read_text(encoding="utf-8"))
-    # allow either {"scenario": {...}} or direct kwargs
-    if isinstance(data, dict) and "scenario" in data and isinstance(data["scenario"], dict):
-        kwargs = dict(data["scenario"])
-    elif isinstance(data, dict):
-        kwargs = dict(data)
-    else:
-        raise ValueError("Scenario JSON is not a dict.")
+    ax = fig.add_subplot(111)
 
-    allowed = {f.name for f in dataclasses.fields(Scenario)}
-    unknown = sorted([k for k in kwargs.keys() if k not in allowed])
-    if unknown:
-        print(f"[generate_figures] Dropping unknown Scenario keys in {path.name}: {unknown}")
-    kwargs = {k: v for k, v in kwargs.items() if k in allowed}
+    # CRÍTICO: eliminar ticks/locators para esquivar el bug de deepcopy en Py3.14 + mpl (ticks crean MarkerStyle)
+    ax.xaxis.set_major_locator(NullLocator())
+    ax.yaxis.set_major_locator(NullLocator())
+    ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
 
-    return Scenario(**kwargs)
+    # Plot
+    x = list(range(len(y)))
+    ax.plot(x, y)
 
-def main():
-    RESULTS.mkdir(parents=True, exist_ok=True)
+    # Etiquetas "manuales" (sin ticks)
+    fig.text(0.01, 0.98, title, ha="left", va="top")
+    fig.text(0.01, 0.02, f"n={len(y)}  min={min(y):.3g}  max={max(y):.3g}", ha="left", va="bottom")
 
-    scenario_files = sorted(RESULTS.glob("S*_*.json"))
-    if not scenario_files:
-        raise SystemExit("No scenario JSON files found under results/ (expected S*_*.json).")
+    fig.tight_layout(rect=[0, 0.05, 1, 0.92])
+    canvas.draw()
+    fig.savefig(out_png)
 
-    made = 0
-    for f in scenario_files:
-        sc = _scenario_from_json(f)
-        res = simulate(sc)
+def _load_json(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"))
 
-        if not isinstance(res, dict):
-            print(f"[generate_figures] simulate() did not return dict for {f.name}; skipping.")
+def generate() -> int:
+    if not RESULTS_DIR.exists():
+        raise SystemExit("Missing results/ directory. Run: python -m scripts.run_scenarios")
+
+    json_files = sorted(RESULTS_DIR.glob("S*.json"))
+    if not json_files:
+        raise SystemExit("No scenario JSON files found (results/S*.json).")
+
+    wrote = 0
+
+    for jf in json_files:
+        obj = _load_json(jf)
+
+        series_candidates: List[Tuple[str, List[float]]] = []
+        for k, v in _walk(obj):
+            if _looks_like_series(v):
+                series_candidates.append((k, [float(x) for x in v]))
+
+        # Si NO hay series numéricas, reporta claves reales para debugging (determinista)
+        if not series_candidates:
+            keys = []
+            if isinstance(obj, dict):
+                keys = sorted(list(obj.keys()))
+            print(f"[generate_figures] {jf.name}: NO numeric series found. top-level keys={keys}")
             continue
 
-        tk, t = _pick_time_axis(res)
-        if t is None:
-            print(f"[generate_figures] No numeric time axis inferred for {f.name}; skipping.")
+        # Selección determinista por prioridad textual
+        o2_pick = _pick_series(series_candidates, prefer_terms=["o2", "oxygen"])
+        w_pick  = _pick_series(series_candidates, prefer_terms=["water", "h2o"])
+
+        # Si no hay match semántico, NO adivinamos: reportamos candidatos y seguimos
+        if o2_pick is None or w_pick is None:
+            print(f"[generate_figures] {jf.name}: cannot select o2/water deterministically.")
+            print("  candidates:")
+            for k, s in sorted(series_candidates, key=lambda x: x[0])[:50]:
+                print(f"   - {k} (len={len(s)})")
             continue
 
-        o2k, o2 = _pick_series(res, "o2")
-        wk,  w  = _pick_series(res, "water")
+        base = jf.stem
+        o2_key, o2_series = o2_pick
+        w_key,  w_series  = w_pick
 
-        stem = f.stem  # e.g., S1_baseline
-        if o2 is not None:
-            out = RESULTS / f"{stem}_o2.png"
-            plt.figure()
-            plt.plot(t, o2)
-            plt.xlabel("Days")
-            plt.ylabel("O2 stock (model units)")
-            plt.title(f"{stem} - O2 ({o2k})")
-            plt.tight_layout()
-            plt.savefig(out, dpi=200)
-            plt.close()
-            made += 1
-            print(f"[generate_figures] Wrote {out.name}")
+        out_o2 = RESULTS_DIR / f"{base}_o2.png"
+        out_w  = RESULTS_DIR / f"{base}_water.png"
 
-        if w is not None:
-            out = RESULTS / f"{stem}_water.png"
-            plt.figure()
-            plt.plot(t, w)
-            plt.xlabel("Days")
-            plt.ylabel("Water stock (model units)")
-            plt.title(f"{stem} - Water ({wk})")
-            plt.tight_layout()
-            plt.savefig(out, dpi=200)
-            plt.close()
-            made += 1
-            print(f"[generate_figures] Wrote {out.name}")
+        _safe_plot_series(out_o2, f"{base} :: O2  (source={o2_key})", o2_series)
+        _safe_plot_series(out_w,  f"{base} :: Water (source={w_key})",  w_series)
 
-        if o2 is None and w is None:
-            print(f"[generate_figures] No O2/Water series detected in simulate() output for {f.name} (keys: {list(res.keys())}).")
+        print(f"[generate_figures] wrote: {out_o2.as_posix()}  {out_w.as_posix()}")
+        wrote += 2
 
-    print(f"[generate_figures] Total figures written: {made}")
+    return wrote
 
 if __name__ == "__main__":
-    main()
+    n = generate()
+    if n == 0:
+        raise SystemExit("No PNGs created. Either no numeric series exist in results/S*.json or selection could not be deterministic.")
+    print(f"OK: created {n} PNGs")
