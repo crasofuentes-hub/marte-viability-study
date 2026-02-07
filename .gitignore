@@ -1,0 +1,9 @@
+﻿__pycache__/
+*.pyc
+.venv/
+.uv/
+.pytest_cache/
+figures/*
+!figures/.gitkeep
+data/*
+!data/.gitkeep
