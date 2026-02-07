@@ -58,3 +58,31 @@ See `CITATION.cff`.
 
 ## DOI
 Zenodo DOI: 10.5281/zenodo.18517605
+
+<!-- RESULTS_BEGIN -->  ## Published runs (reproducible)  The following results are **computed outputs** from committed code + verified constants. Each scenario has a machine-readable ecord.json and (when detectable) 	imeseries.csv + plots.  Run batch: `ash python results/20260207_113551/run_scenarios.py  <!-- RESULTS_END -->
+
+<!-- RESULTS_BLOCK_BEGIN -->
+## Results (reproducible runs)
+
+Generated deterministically by running:
+
+    python -m scripts.run_scenarios
+
+Artifacts saved under results/:
+ - results/summary.csv (machine-readable)
+ - results/summary.md (table)
+ - results/*.json (scenario + summary)
+ - results/*_o2.png and results/*_water.png (figures)
+
+| scenario_id | N0 | o2_storage_days | water_storage_days | o2_local_fraction | water_local_fraction | water_recovery_fraction | launch_window_days | missed_window_probability | collapsed | collapse_day | dose_msv |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| S1_baseline | 12 | 365 | 365 | 0.97 | 0.98 | 0.98 | 780 | 0.2 | False | None | None |
+| S2_higher_closure_buffers | 12 | 730 | 730 | 0.995 | 0.995 | 0.98 | 780 | 0.1 | False | None | None |
+| S3_scale_stress | 50 | 365 | 365 | 0.98 | 0.985 | 0.98 | 780 | 0.2 | False | None | None |
+
+
+### Figures
+ - results/S1_baseline_o2.png and results/S1_baseline_water.png
+ - results/S2_higher_closure_buffers_o2.png and results/S2_higher_closure_buffers_water.png
+ - results/S3_scale_stress_o2.png and results/S3_scale_stress_water.png
+<!-- RESULTS_BLOCK_END -->

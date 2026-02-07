@@ -1,0 +1,23 @@
+{
+  "scenario_id": "S2_higher_closure_buffers",
+  "scenario": {
+    "N0": 12,
+    "years": 25,
+    "dt_days": 1,
+    "o2_storage_days": 730,
+    "water_storage_days": 730,
+    "o2_local_fraction": 0.995,
+    "water_local_fraction": 0.995,
+    "water_recovery_fraction": 0.98,
+    "launch_window_days": 780,
+    "missed_window_probability": 0.1,
+    "import_restore_fraction_o2": 1.0,
+    "import_restore_fraction_water": 1.0,
+    "cruise_days": 210
+  },
+  "result_summary": {
+    "collapsed": false,
+    "collapse_day": null,
+    "dose_msv": null
+  }
+}

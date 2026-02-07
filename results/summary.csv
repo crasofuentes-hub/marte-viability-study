@@ -1,0 +1,4 @@
+scenario_id,N0,years,dt_days,o2_storage_days,water_storage_days,o2_local_fraction,water_local_fraction,water_recovery_fraction,launch_window_days,missed_window_probability,import_restore_fraction_o2,import_restore_fraction_water,cruise_days,collapsed,collapse_day,dose_msv
+S1_baseline,12,10,1,365,365,0.97,0.98,0.98,780,0.2,1.0,1.0,210,False,,
+S2_higher_closure_buffers,12,25,1,730,730,0.995,0.995,0.98,780,0.1,1.0,1.0,210,False,,
+S3_scale_stress,50,10,1,365,365,0.98,0.985,0.98,780,0.2,1.0,1.0,210,False,,
