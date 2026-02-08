@@ -1,4 +1,4 @@
-# Mars Colony Viability (Strict Science-Only Baseline)
+﻿# Mars Colony Viability (Strict Science-Only Baseline)
 
 This repository starts from **zero assumptions** and enforces a hard rule:
 
@@ -113,5 +113,10 @@ Reproduce (PowerShell):
 python -m scripts.run_scenarios
 
 Falsifiable outcome statements:
+
+Interpretation:
+- day N is taken from result_summary.collapse_day (model-emitted).
+- A future improvement is to emit collapse_cause (O2 vs water vs radiation) explicitly.
 <!-- PUBLISHED_RESULTS_END -->
+
 

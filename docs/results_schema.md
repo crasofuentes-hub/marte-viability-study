@@ -1,6 +1,6 @@
 ﻿# Results Schema Evidence
 
-This file is generated from results/S*.json produced by the public runner.
+Generated from results/S*.json produced by the public runner.
 
 ## S1_baseline.json
 
