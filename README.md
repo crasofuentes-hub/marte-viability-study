@@ -86,3 +86,16 @@ Artifacts saved under results/:
  - results/S2_higher_closure_buffers_o2.png and results/S2_higher_closure_buffers_water.png
  - results/S3_scale_stress_o2.png and results/S3_scale_stress_water.png
 <!-- RESULTS_BLOCK_END -->
+
+## Published Results (Reproducible)
+
+The following scenarios were executed using the public codebase.
+All results below are generated directly from model execution.
+
+See:
+- \esults/published_metrics.csv\
+- \esults/published_metrics.md\
+
+Key observable metric:
+- \days_elapsed\: simulated survival time until system collapse.
+
