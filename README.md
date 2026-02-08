@@ -99,3 +99,19 @@ See:
 Key observable metric:
 - \days_elapsed\: simulated survival time until system collapse.
 
+
+
+<!-- PUBLISHED_RESULTS_START -->
+## Published Results (Reproducible)
+
+Artifacts:
+- results/published_metrics.csv
+- results/published_metrics.md
+- docs/results_schema.md
+
+Reproduce (PowerShell):
+python -m scripts.run_scenarios
+
+Falsifiable outcome statements:
+<!-- PUBLISHED_RESULTS_END -->
+

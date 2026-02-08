@@ -11,3 +11,5 @@ data/*
 # Matplotlib cache (do not commit)
 results/_mplconfig/
 results/_mplconfig/**
+
+.cache/mplconfig/
