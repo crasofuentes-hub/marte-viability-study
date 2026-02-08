@@ -105,19 +105,19 @@ Key observable metric:
 ## Published Results (Reproducible)
 
 Artifacts:
-- results/published_metrics.csv
-- results/published_metrics.md
-- docs/results_schema.md
-- results/figures (if series exist)
+- results/summary.csv (model output)
+- results/summary.md (model output)
+- results/published_summary.csv (copy for citation)
+- results/published_summary.md (copy for citation)
+- results/figures/*.png (generated from summary.csv when possible)
 
 Reproduce (PowerShell):
 python -m scripts.run_scenarios --inputs results/_scenario_inputs --outdir results
 
-Falsifiable outcome statements:
-
-Interpretation:
-- day N is taken from result_summary.collapse_day (or days_elapsed if present).
-- If O2/Water depletion series are not present in JSON, figures are omitted truthfully.
+Falsifiable outcome statements (directly from summary.csv):
+- S1_baseline -> collapsed=False; day=; dose_msv=
+- S2_higher_closure_buffers -> collapsed=False; day=; dose_msv=
+- S3_scale_stress -> collapsed=False; day=; dose_msv=
 <!-- PUBLISHED_RESULTS_END -->
 
 
