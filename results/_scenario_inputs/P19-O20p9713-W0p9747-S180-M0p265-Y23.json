@@ -1,0 +1,12 @@
+﻿{
+    "scenario_id":  "P19-O20p9713-W0p9747-S180-M0p265-Y23",
+    "scenario":  {
+                     "population":  19,
+                     "o2_closure":  0.9713,
+                     "water_closure":  0.9747,
+                     "storage_days":  180,
+                     "resupply_window_days":  780,
+                     "resupply_miss_probability":  0.265,
+                     "sim_days":  8401
+                 }
+}
