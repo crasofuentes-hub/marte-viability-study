@@ -1,3 +1,5 @@
+﻿[![DOI](https://zenodo.org/badge/1149651949.svg)](https://doi.org/10.5281/zenodo.18481530)
+
 # Mars Colony Viability (Strict Science-Only Baseline)
 
 This repository starts from **zero assumptions** and enforces a hard rule:
@@ -100,5 +102,6 @@ Artifacts:
 Notes:
 - If collapse_day is N/A, the run ended without emitting a collapse day for that scenario (model output), not a manual edit.
 <!-- PUBLISHED_RESULTS_END -->
+
 
 
