@@ -103,5 +103,12 @@ Notes:
 - If collapse_day is N/A, the run ended without emitting a collapse day for that scenario (model output), not a manual edit.
 <!-- PUBLISHED_RESULTS_END -->
 
+## Cite this work
 
+If you use this repository in research, please cite the Zenodo record.
+
+- **Concept DOI (recommended):** https://doi.org/10.5281/zenodo.18481530  
+  *(always resolves to the latest version)*
+- **Version DOI:** https://doi.org/10.5281/zenodo.18481531  
+  *(fixed snapshot for strict reproducibility)*
 
